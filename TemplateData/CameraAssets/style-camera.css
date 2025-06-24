@@ -1,0 +1,51 @@
+#startARDiv {
+  background: url("./camera-bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  justify-content: center;
+}
+#startARButton {
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+#startARButton img {
+  display: block;
+  width: 50vw;
+  height: auto;
+}
+
+#cameraLogoImageTop {
+  display: flex;
+  position: absolute;
+  top: 8%;
+  width: 80%;
+  height: auto;
+}
+#cameraLogoImage {
+  display: flex;
+  position: absolute;
+  bottom: 3%;
+  width: 50%;
+  height: auto;
+}
+#cameraTextImage {
+  display: flex;
+  position: absolute;
+  top: 30%;
+  width: 90%;
+  height: auto;
+}
+/* #cameraButtonImage {
+  display: flex;
+  position: absolute;
+  top: 70%;
+  width: 50%;
+  height: auto;
+} */
