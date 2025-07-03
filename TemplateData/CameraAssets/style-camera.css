@@ -42,6 +42,24 @@
   width: 90%;
   height: auto;
 }
+#landscape-div {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+  display: flex;
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(172deg, #01bb00 8.36%, #017301 100.67%);
+}
+#landscape-div-img {
+  height: 80%;
+  width: auto;
+}
 /* #cameraButtonImage {
   display: flex;
   position: absolute;

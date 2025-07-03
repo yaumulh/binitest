@@ -82,6 +82,12 @@
       id="video-canvas"
       style="width: 100%; height: 100%; object-fit: cover; position: absolute"
     ></canvas> -->
+    <div id="landscape-div">
+      <img
+        id="landscape-div-img"
+        src="./TemplateData/CameraAssets/img_best_view.png"
+      />
+    </div>
     <div id="startARDiv" class="ctaDiv">
       <!-- Show/Hide camera selection -->
       <select
@@ -264,6 +270,19 @@
           });
           loadingBar.style.display = "block";
       }
+      (() => {
+        const land = document.getElementById("landscape-div");
+        const landImg = document.getElementById("landscape-div-img");
+        const mq = matchMedia("(orientation:portrait)");
+        const flip = () => {
+          const isPortrait = mq.matches;
+          landImg.style.opacity = isPortrait ? 0 : 1;
+          land.style.zIndex = isPortrait ? "" : 9999;
+          console.log("change orientation: ", isPortrait);
+        };
+        flip();
+        mq.addEventListener("change", flip);
+      })();
       //Set Facing Mode here ('environment', 'user', '')
 		window.unityFacingMode = "environment"
       window.WEBCAM_SETTINGS = {
