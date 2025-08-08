@@ -69,6 +69,6 @@ function forward_to_other_api($firstName, $lastName, $dob, $email, $mobileNumber
     ];
 }
 
-forward_to_other_api($firstName, $lastName, $dob, $email, $mobileNumber, $region, $province, $privacy, $consent);
+$apiResult = forward_to_other_api($firstName, $lastName, $dob, $email, $mobileNumber, $region, $province, $privacy, $consent);
 
 echo is_array($apiResult) ? json_encode($apiResult) : $apiResult;
