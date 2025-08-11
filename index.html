@@ -25,76 +25,7 @@
         console.log("Tracked simple event:", eventName);
       }
     </script>
-     <!-- ini test buat keyboard -->
-    <script>
-    (function () {
-      // konfigurasi threshold (px). Jika innerHeight turun lebih dari ini => keyboard kemungkinan muncul.
-      const KEYBOARD_THRESHOLD = 150;
-      // simpan tinggi awal setelah load/render
-      let originalInnerHeight = window.innerHeight || document.documentElement.clientHeight;
-      let keyboardOpen = false;
-      let lockCount = 0; // multiple focus protection
-      // helper: update original height (call on orientation change or manual)
-      function refreshOriginalHeight() {
-        originalInnerHeight = window.innerHeight || document.documentElement.clientHeight;
-      }
-      // capture resize early: when keyboard appears, block propagation so Unity won't resize canvas
-      window.addEventListener('resize', function (ev) {
-        const ih = window.innerHeight || document.documentElement.clientHeight;
-        const diff = originalInnerHeight - ih;
-        if (diff > KEYBOARD_THRESHOLD) {
-          // keyboard opened (viewport reduced)
-          keyboardOpen = true;
-          // stop other listeners (Unity's resize handlers) from reacting
-          ev.stopImmediatePropagation();
-          // also prevent default safe-guard
-          // (do not call preventDefault in capture by default; stopping propagation sufficient)
-          return;
-        }
-        if (keyboardOpen && ih >= (originalInnerHeight - 10)) {
-          // keyboard probably closed; restore
-          keyboardOpen = false;
-          // update stored original height (keyboard closed; real height now)
-          refreshOriginalHeight();
-          // allow event to continue (we are in capture, but we already returned earlier only when keyboardOpen)
-        }
-        // else: small resize (rotate etc) -> allow normal propagation
-      }, true); // use capture so we intercept before Unity
-      // orientation change -> update baseline after small delay
-      window.addEventListener('orientationchange', function () {
-        setTimeout(refreshOriginalHeight, 500);
-      });
-      // Public manager used by the jslib
-      window.__UnityKeyboardManager = {
-        onFocus: function () {
-          lockCount++;
-          // fix body height so the page won't re-layout to new viewport height while keyboard open
-          document.documentElement.style.height = originalInnerHeight + 'px';
-          document.body.style.height = originalInnerHeight + 'px';
-          document.body.style.overflow = 'hidden';
-          document.documentElement.style.overflow = 'hidden';
-        },
-        onBlur: function () {
-          lockCount = Math.max(0, lockCount - 1);
-          if (lockCount === 0) {
-            document.body.style.overflow = '';
-            document.documentElement.style.overflow = '';
-            document.documentElement.style.height = '';
-            document.body.style.height = '';
-            // small delay to let browser settle, then refresh baseline height
-            setTimeout(function () {
-              refreshOriginalHeight();
-            }, 300);
-          }
-        },
-        refreshOriginalHeight: refreshOriginalHeight
-      };
-      // init: update originalInnerHeight after load/idle
-      window.addEventListener('load', function () {
-        setTimeout(refreshOriginalHeight, 300);
-      });
-    })();
-    </script>
+    
     <meta
       name="viewport"
       content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=yes"
@@ -314,8 +245,8 @@
           document.getElementById("startARButton").style.display = "none";
           document.getElementById("chooseCamSel").style.display = "none";
           createUnityInstance(document.querySelector("#unity-canvas"), {
-              dataUrl: "Build/a724088dec4ac83e4e9ddf27f0aa3ce9.data",
-              frameworkUrl: "Build/5bc1cdafe6d8930344bf595d3739c670.framework.js",
+              dataUrl: "Build/6a4b96d6fbe9eb2d3161d81984955d45.data",
+              frameworkUrl: "Build/3c077beb3f4dc8ad7025738d8884479d.framework.js",
               codeUrl: "Build/bca3138080f2193214e7be0c216f49a9.wasm",
               streamingAssetsUrl: "StreamingAssets",
               companyName: "DefaultCompany",
