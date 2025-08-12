@@ -3,10 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-D88WN5VBWM"></script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-D88WN5VBWM"
+    ></script>
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag() { dataLayer.push(arguments); }
+      function gtag() {
+        dataLayer.push(arguments);
+      }
       gtag("js", new Date());
       gtag("config", "G-D88WN5VBWM");
       function TrackEventFromUnityWithParams(eventName, paramName, paramValue) {
@@ -20,99 +25,184 @@
         console.log("Tracked simple event:", eventName);
       }
     </script>
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=yes" />
+    
+    <meta
+      name="viewport"
+      content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=yes"
+    />
     <title>AR PaylessXBINI</title>
     <link rel="stylesheet" href="TemplateData/style.css" />
     <link rel="stylesheet" href="TemplateData/CameraAssets/style-camera.css" />
     <style>
-      html, body {
+      html {
+        height: -webkit-fill-available;
+      }
+      body {
         margin: 0;
-        background: black; /* prevent white flicker */
         padding: 0;
-        height: 100%;
-        width: 100%;
-        overflow: hidden;
-      }
-      #unity-container {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-      }
-      #unity-canvas {
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
         width: 100vw;
-        height: 100vh;
-        background: transparent;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 100;
-      }
-      #video-canvas {
-        width: 100vw;
-        height: 100vh;
-        position: fixed;
-        top: 0;
-        left: 0;
-        object-fit: cover;
-        background: transparent;
-        z-index: 50;
+        overflow: hidden;
       }
       .ctaDiv {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        position: fixed;
+        position: absolute;
         left: 0;
         right: 0;
         top: 0;
         bottom: 0;
         background: #01ab01;
-        z-index: 200;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
-      }
-      .hidden {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
+        z-index: 99;
       }
     </style>
   </head>
   <body>
-    <video id="webcam-video" muted autoplay playsinline style="width: 1px; position: absolute"></video>
+    <!--IMAGETARGETS-->
+		<imagetarget id='1_MIKHA' src='targets/1_MIKHA.jpg'></imagetarget>
+		<imagetarget id='2_MALOY' src='targets/2_MALOY.jpg'></imagetarget>
+		<imagetarget id='3_JHOANA' src='targets/3_JHOANA.jpg'></imagetarget>
+		<imagetarget id='4_STACEY' src='targets/4_STACEY.jpg'></imagetarget>
+		<imagetarget id='5_AIAH' src='targets/5_AIAH.jpg'></imagetarget>
+		<imagetarget id='6_GWEN' src='targets/6_GWEN.jpg'></imagetarget>
+		<imagetarget id='7_COLET' src='targets/7_COLET.jpg'></imagetarget>
+		<imagetarget id='8_SHEENA' src='targets/8_SHEENA.jpg'></imagetarget>
+		<imagetarget id='9_GROUP' src='targets/9_GROUP.jpg'></imagetarget>
+
+    <video
+      id="webcam-video"
+      muted
+      autoplay
+      playsinline
+      style="width: 1px; position: absolute"
+    ></video>
+    <!-- <canvas
+      id="video-canvas"
+      style="width: 100%; height: 100%; object-fit: cover; position: absolute"
+    ></canvas> -->
     <div id="landscape-div">
-      <img id="landscape-div-img" src="./TemplateData/CameraAssets/img_best_view.png" />
+      <img
+        id="landscape-div-img"
+        src="./TemplateData/CameraAssets/img_best_view.png"
+      />
     </div>
     <div id="startARDiv" class="ctaDiv">
-      <select id="chooseCamSel" style="display: none" onchange="SelectCam()"></select>
-      <img id="cameraLogoImageTop" src="TemplateData/CameraAssets/camera-logo-top.png" alt="" />
-      <img id="cameraTextImage" src="TemplateData/CameraAssets/camera-text.png" alt="" />
+      <!-- Show/Hide camera selection -->
+      <select
+        id="chooseCamSel"
+        style="display: none"
+        onchange="SelectCam()"
+      ></select>
+      <!-- Unused text -->
+      <!-- <p style="text-align: center; width: 60vw">
+        This augmented reality experience requires access to your device's
+        camera
+      </p> -->
+      <img
+        id="cameraLogoImageTop"
+        src="TemplateData/CameraAssets/camera-logo-top.png"
+        alt=""
+      />
+      <img
+        id="cameraTextImage"
+        src="TemplateData/CameraAssets/camera-text.png"
+        alt=""
+      />
       <button id="startARButton" onclick="StartAR()" style="display: none">
-        <img id="cameraButtonImage" src="TemplateData/CameraAssets/camera-button.png" alt="" />
+        <img
+          id="cameraButtonImage"
+          src="TemplateData/CameraAssets/camera-button.png"
+          alt=""
+        />
       </button>
-      <img id="cameraLogoImage" src="TemplateData/CameraAssets/camera-logo.png" alt="" />
+      <img
+        id="cameraLogoImage"
+        src="TemplateData/CameraAssets/camera-logo.png"
+        alt=""
+      />
     </div>
-    <div id="screenshotDiv" class="ctaDiv hidden">
-      <div style="position: relative; background-color: #01ab01; padding: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);">
-        <img id="screenshotImg" src="" alt="screenshot" style="width: 80vw; height: 80vh" />
-        <button onclick="document.getElementById('screenshotDiv').classList.add('hidden')" style="position: fixed; transform: translateY(-100%); right: 0; top: 0;">Close</button>
+    <div id="screenshotDiv" style="display: none" class="ctaDiv">
+      <div
+        style="
+          position: relative;
+          background-color: #01ab01;
+          padding: 10px;
+          box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3),
+            0 6px 20px 0 rgba(0, 0, 0, 0.25);
+        "
+      >
+        <img
+          id="screenshotImg"
+          src=""
+          alt="screenshot"
+          style="width: 80vw; height: 80vh"
+        />
+        <button
+          onclick="document.getElementById('screenshotDiv').style.display = 'none';"
+          style="
+            position: absolute;
+            transform: translateY(-100%);
+            right: 0;
+            top: 0;
+          "
+        >
+          Close
+        </button>
       </div>
     </div>
-    <div id="confirmUrlDiv" class="ctaDiv hidden">
-      <div style="position: relative; background-color: #01ab01; padding: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25); width: 80vw; display: flex; flex-direction: column; align-items: center;">
-        <p id="confirmUrlText" style="text-align: center; width: 80%; overflow: hidden; text-overflow: ellipsis;">Are you sure you want to visit url.com?</p>
+    <div id="confirmUrlDiv" style="display: none" class="ctaDiv">
+      <div
+        style="
+          position: relative;
+          background-color: #01ab01;
+          padding: 10px;
+          box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3),
+            0 6px 20px 0 rgba(0, 0, 0, 0.25);
+          width: 80vw;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        "
+      >
+        <p
+          id="confirmUrlText"
+          style="
+            text-align: center;
+            width: 80%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          "
+        >
+          Are you sure you want to visit url.com?
+        </p>
         <div>
-          <button onclick="window.open(newUrlString, '_blank').focus(); document.getElementById('confirmUrlDiv').classList.add('hidden')">VISIT SITE</button>
-          <button onclick="document.getElementById('confirmUrlDiv').classList.add('hidden')">GO BACK</button>
+          <button
+            onclick="window.open(newUrlString, '_blank').focus(); document.getElementById('confirmUrlDiv').style.display = 'none'"
+          >
+            VISIT SITE
+          </button>
+          <button
+            onclick="document.getElementById('confirmUrlDiv').style.display = 'none'"
+          >
+            GO BACK
+          </button>
         </div>
       </div>
     </div>
-    <div id="errorDiv" class="ctaDiv hidden" style="background: #aaa">
-      <p id="errorText" style="text-align: center; width: 60vw; color: white"></p>
+    <div id="errorDiv" class="ctaDiv" style="display: none; background: #aaa">
+      <p
+        id="errorText"
+        style="text-align: center; width: 60vw; color: white"
+      ></p>
     </div>
     <div id="unity-container" class="unity-mobile">
-      <canvas id="unity-canvas"></canvas>
+      <canvas
+        id="unity-canvas"
+        style="width: 100%; height: 100%; background: transparent; z-index: 100"
+      ></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -125,62 +215,61 @@
     <script src="itracker.js" type="text/javascript"></script>
     <script src="Build/bb0d9ecdb05db3e84da20bd14a4f84dc.loader.js"></script>
     <script>
-      var initialize = async () => {
-        var unityCanvas = document.querySelector("#unity-canvas");
-        var videoCanvas = document.querySelector("#video-canvas");
-        window.arCamera = new ARCamera(unityCanvas, videoCanvas);
-        window.iTracker = new ImageTracker(arCamera);
-        try {
-          await window.iTracker.initialize("./opencv.js");
-          console.log("ImageTracker initialized!");
-        } catch {
-          console.error("Failed to initialize ImageTracker. Are you missing opencv.js?");
-          ShowError("Failed to initialize the experience.");
-          return;
-        }
-        await LoadWebcams();
-        document.getElementById("startARButton").style.display = "flex";
-        window.permissionsGranted = await IsCameraPermissionGranted(); // ✅ pakai await
-      };
+      var initialize = async() =>{
+          var unityCanvas = document.querySelector("#unity-canvas");
+          var videoCanvas = document.querySelector("#video-canvas");
+          window.arCamera = new ARCamera(unityCanvas, videoCanvas);
+          window.iTracker = new ImageTracker(arCamera);
+          try{
+              await window.iTracker.initialize("./opencv.js");
+              console.log("ImageTracker initialized!");
+          }
+          catch{
+              console.error("Failed to initialize ImageTracker. Are you missing opencv.js? " + error);
+              ShowError("Failed to initialize the experience.");
+              return;
+          }
+          await LoadWebcams();
+          document.getElementById("startARButton").style.display = "flex";
+          window.permissionsGranted = IsCameraPermissionGranted();
+      }
       initialize();
+      var container = document.querySelector("#unity-container");
       var canvas = document.querySelector("#unity-canvas");
       var loadingBar = document.querySelector("#unity-loading-bar");
       var progressBarFull = document.querySelector("#unity-progress-bar-full");
-      var videoCanvas = document.querySelector("#video-canvas");
       function StartAR() {
-        document.getElementById("startARDiv").classList.add("hidden");
-        document.getElementById("chooseCamSel").style.display = "none";
-        createUnityInstance(canvas, {
-            dataUrl: "Build/7883b95157ab90cb9ac41d15fb229039.data",
-            frameworkUrl: "Build/be4bf5028a38e037133b74d79d7b5558.framework.js",
-            codeUrl: "Build/426af1defc554b0f8e90e2242a4ba38f.wasm",
-            streamingAssetsUrl: "StreamingAssets",
-            companyName: "DefaultCompany",
-            productName: "AR PaylessXBINI",
-            productVersion: "1.0.19",
-            matchWebGLToCanvasSize: true,
-            webglContextAttributes: { alpha: true, preserveDrawingBuffer: true }
-          },
-          (progress) => { progressBarFull.style.width = (100 * progress) + "%"; }
-        ).then((unityInstance) => {
-          window.unityInstance = unityInstance;
-          if (window.permissionsGranted === true) {
-            RequestWebcam();
-          }
-          loadingBar.style.display = "none";
-          // ✅ sync video setelah Unity siap
-          function syncVideoSize() {
-            const rect = canvas.getBoundingClientRect();
-            videoCanvas.style.width = rect.width + "px";
-            videoCanvas.style.height = rect.height + "px";
-            videoCanvas.style.left = rect.left + "px";
-            videoCanvas.style.top = rect.top + "px";
-          }
-          syncVideoSize();
-          window.addEventListener("resize", syncVideoSize);
-          window.addEventListener("orientationchange", syncVideoSize);
-        });
-        loadingBar.style.display = "block";
+          canvas.style.width = window.innerWidth + "px";
+          canvas.style.height = window.innerHeight + "px";
+          document.getElementById("startARDiv").style.display = "none";
+          document.getElementById("startARButton").style.display = "none";
+          document.getElementById("chooseCamSel").style.display = "none";
+          createUnityInstance(document.querySelector("#unity-canvas"), {
+              dataUrl: "Build/e786ea6ca87b8fb96ce26a8754f9598e.data",
+              frameworkUrl: "Build/be4bf5028a38e037133b74d79d7b5558.framework.js",
+              codeUrl: "Build/426af1defc554b0f8e90e2242a4ba38f.wasm",
+              streamingAssetsUrl: "StreamingAssets",
+              companyName: "DefaultCompany",
+              productName: "AR PaylessXBINI",
+              productVersion: "1.0.19",
+              // webglContextAttributes: { "preserveDrawingBuffer": true },
+              // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
+              // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
+              webglContextAttributes: {
+              alpha: true,
+              preserveDrawingBuffer: true
+              }
+              },
+              (progress) => {
+                  progressBarFull.style.width = 100 * progress + "%";
+              }
+          ).then((unityInstance) => {
+              window.unityInstance = unityInstance;
+              if(window.permissionsGranted)
+                  RequestWebcam();
+              loadingBar.style.display = "none";
+          });
+          loadingBar.style.display = "block";
       }
       (() => {
         const land = document.getElementById("landscape-div");
@@ -190,102 +279,183 @@
           const isPortrait = mq.matches;
           landImg.style.opacity = isPortrait ? 0 : 1;
           land.style.zIndex = isPortrait ? "" : 9999;
+          console.log("change orientation: ", isPortrait);
         };
         flip();
         mq.addEventListener("change", flip);
       })();
+      //Set Facing Mode here ('environment', 'user', '')
 		window.unityFacingMode = "environment"
-      window.WEBCAM_SETTINGS = { video: { facingMode: unityFacingMode }, audio: false };
+      window.WEBCAM_SETTINGS = {
+          video: {
+              facingMode: unityFacingMode,
+          },
+          audio: false
+      };
       window.requestingForPermissions = false;
-      async function RequestWebcam() {
-        window.requestingForPermissions = true;
-        try {
-          window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
-          requestingForPermissions = false;
-          StopWebcam();
-        } catch (err) {
-          console.error("getUserMedia error - ", err);
-          ShowError("Failed to start the experience. Camera permission was denied");
-          window.requestingForPermissions = false;
-        }
+      async function RequestWebcam(){
+          window.requestingForPermissions = true;
+          try{
+              window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
+              console.log("Webcam access granted");
+              requestingForPermissions = false;
+              // Immediately stop the stream to release the camera
+              StopWebcam();
+          }
+          catch (err) {
+              //user denied camera permission - show error panel
+              console.error("getUserMedia error - " , err);
+              ShowError("Failed to start the experience. Camera permission was denied");
+              window.requestingForPermissions = false;
+          }
       }
-      function StopWebcam() { window.webcamStream.getTracks().forEach(track => track.stop()); }
-      async function StartWebcam() {
-        window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
-        while (window.requestingForPermissions) await new Promise(resolve => setTimeout(resolve, 100));
-        if (window.webcamStream) {
+      function StopWebcam(){
+          console.log("stopping camera");
+          window.webcamStream.getTracks().forEach(track => track.stop());
+      }
+      async function StartWebcam(){
+          console.log("StartWebcam")
+          window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
+          while (window.requestingForPermissions) {
+              // Wait until requestingForPermissions becomes true.
+              console.log("Waiting for permissions...");
+              await new Promise(resolve => setTimeout(resolve, 100)); // Adjust the delay time as needed.
+          }
+          console.log("Got Permissions");
+          if(window.webcamStream)
+          {
+              const video = document.querySelector("#webcam-video");
+              video.srcObject = webcamStream;
+              try {
+                  await arCamera.startWebcam(video);
+                  console.log("Webcam started successfully");
+                  window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamSuccess');
+              }
+              catch(err){
+                  console.error("Webcam failed to start - ", err);
+                  window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
+              }
+          }
+          else{
+              console.error("Webcam failed to start - permission not yet granted");
+              window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
+          }
+      }
+      async function LoadWebcams(){
+          let camDevices = [];
+          // let backCams = [];
+          let devices = await navigator.mediaDevices.enumerateDevices();
+          var ctr = 0;
+          devices.forEach(mediaDevice => {
+              if (mediaDevice.kind === 'videoinput') {
+                  if(window.unityFacingMode == 'environment' && !mediaDevice.label.includes('facing front')){
+                      //back cam only
+                      camDevices.push(mediaDevice);
+                  }
+                  else if(window.unityFacingMode == 'user' && mediaDevice.label.includes('facing front')){
+                      //front cam only
+                      camDevices.push(mediaDevice);
+                  }
+                  else{
+                      //back and front
+                      camDevices.push(mediaDevice);
+                  }
+                  ctr++;
+              }
+          });
+          var select = document.getElementById("chooseCamSel");
+          // select.style.display = "block";
+          var count = 0;
+          //reverse array because some Android phones can't distinguish front and back cams at first load
+          //and when this happens, most of the time, front cam goes first and back cam goes last
+          camDevices = camDevices.reverse();
+          camDevices.forEach(mediaDevice => {
+              const option = document.createElement('option');
+              option.value = mediaDevice.deviceId;
+              let label = `Camera ${count}`;
+              if (mediaDevice.label) {
+                  label = mediaDevice.label
+              }
+              const textNode = document.createTextNode(label);
+              option.appendChild(textNode);
+              select.appendChild(option);
+              count++;
+          });
+          // iTracker.WEBCAM_NAME = select.options[select.selectedIndex].innerHTML;
+      }
+      function SelectCam(){
+          var select = document.getElementById("chooseCamSel");
+          window.deviceId = select.value;
+          window.WEBCAM_SETTINGS.video['deviceId'] = deviceId;
+          //console.log(window.WEBCAM_SETTINGS);
+          // iTracker.WEBCAM_NAME = select.options[select.selectedIndex].innerHTML;
+      }
+      async function FlipCam(){
+          arCamera.stopWebcam();
+          window.WEBCAM_SETTINGS.video.deviceId = '';
+          if(window.WEBCAM_SETTINGS.video.facingMode == 'user'){
+              window.WEBCAM_SETTINGS.video.facingMode = 'environment';
+              arCamera.setFlipped(false);
+          }
+          else{
+              window.WEBCAM_SETTINGS.video.facingMode = 'user';
+              arCamera.setFlipped(true);
+          }
+          window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
           const video = document.querySelector("#webcam-video");
           video.srcObject = webcamStream;
-          try {
-            await arCamera.startWebcam(video);
-            window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamSuccess');
-          } catch(err) {
-            window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
-          }
-        } else {
-          window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
-        }
-      }
-      async function LoadWebcams() {
-        let camDevices = [];
-        let devices = await navigator.mediaDevices.enumerateDevices();
-        devices.forEach(mediaDevice => {
-          if (mediaDevice.kind === 'videoinput') camDevices.push(mediaDevice);
-        });
-        camDevices = camDevices.reverse();
-        var select = document.getElementById("chooseCamSel");
-        camDevices.forEach((mediaDevice, count) => {
-          const option = document.createElement('option');
-          option.value = mediaDevice.deviceId;
-          option.textContent = mediaDevice.label || `Camera ${count}`;
-          select.appendChild(option);
-        });
-      }
-      function SelectCam() {
-        var select = document.getElementById("chooseCamSel");
-        window.deviceId = select.value;
-        window.WEBCAM_SETTINGS.video['deviceId'] = deviceId;
-      }
-      async function FlipCam() {
-        arCamera.stopWebcam();
-        window.WEBCAM_SETTINGS.video.deviceId = '';
-        if (window.WEBCAM_SETTINGS.video.facingMode == 'user') {
-          window.WEBCAM_SETTINGS.video.facingMode = 'environment';
-          arCamera.setFlipped(false);
-        } else {
-          window.WEBCAM_SETTINGS.video.facingMode = 'user';
-          arCamera.setFlipped(true);
-        }
-        window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
-        const video = document.querySelector("#webcam-video");
-        video.srcObject = webcamStream;
-        await arCamera.startWebcam(video);
+          await arCamera.startWebcam(video);
       }
       async function IsCameraPermissionGranted() {
-        if (!navigator.permissions || !navigator.mediaDevices) return false;
-        try {
-          const permissionStatus = await navigator.permissions.query({ name: "camera" });
-          return permissionStatus.state === "granted";
-        } catch {
-          return false;
-        }
+          if (!navigator.permissions || !navigator.mediaDevices) {
+              console.log("Permissions API or mediaDevices not supported.");
+              return false;
+          }
+          try {
+              // Query the status of the camera permission
+              const permissionStatus = await navigator.permissions.query({ name: "camera" });
+              if (permissionStatus.state === "granted") {
+              console.log("Camera permission has already been granted.");
+              return true;
+              } else if (permissionStatus.state === "prompt") {
+              console.log("Camera permission is promptable.");
+              return false;
+              } else {
+              console.log("Camera permission has been denied.");
+              return false;
+              }
+          } catch (error) {
+              console.log("Error checking camera permission:", error);
+              return false;
+          }
       }
-      function ShowError(error) {
-        document.getElementById("errorDiv").classList.remove("hidden");
-        document.getElementById("errorText").innerHTML = error;
+      function ShowError(error){
+          document.getElementById("errorDiv").style.display = "flex";
+          document.getElementById("errorText").innerHTML = error;
       }
-      function ShowScreenshot(dataUrl) {
-        document.getElementById("screenshotDiv").classList.remove("hidden");
-        document.getElementById("screenshotImg").src = dataUrl;
+      function ShowScreenshot(dataUrl){
+          document.getElementById("screenshotDiv").style.display = "flex";
+          document.getElementById("screenshotImg").src = dataUrl;
+          document.getElementById("screenshotImg").style.width = "80vw";
+          document.getElementById("screenshotImg").style.height = 80 / window.innerWidth * window.innerHeight + "vw";
       }
-      function ShowConfirmUrl(url) {
-        document.getElementById("confirmUrlDiv").classList.remove("hidden");
-        window.newUrlString = url;
-        document.getElementById("confirmUrlText").innerText = "Are you sure you want to visit " + url;
+      function ShowConfirmUrl(url){
+          document.getElementById("confirmUrlDiv").style.display = "flex";
+          window.newUrlString = url;
+          document.getElementById("confirmUrlText").innerText = "Are you sure you want to visit " + url;
       }
-      window.ITRACKER_GLOBALS = { INTERNAL_SMOOTHFACTOR_POS: .075 };
+      window.ITRACKER_GLOBALS = {
+          //place global settings here
+          INTERNAL_SMOOTHFACTOR_POS: .075,
+      }
     </script>
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics-compat.js"></script> -->
+    <!-- <script src="./TemplateData/firebase-cdn/firebase-analytics-compat.js"></script> -->
     <script src="./TemplateData/firebase-cdn/firebase-app-compat.js"></script>
+    <!-- <script src="./TemplateData/firebase-cdn/firebase-auth-compat.js"></script> -->
     <script src="./TemplateData/firebase-cdn/firebase-firestore-compat.js"></script>
     <script>
       const firebaseApp = firebase.initializeApp({
@@ -298,6 +468,7 @@
         measurementId: "G-75JGD4FS6C",
       });
       const db = firebaseApp.firestore();
+      // const auth = firebaseApp.auth();
     </script>
   </body>
 </html>
