@@ -1,110 +1,146 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="utf-8" />
-<title>AR PaylessXBINI</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<style>
-  body, html {
-    margin: 0;
-    padding: 0;
-    background-color: #00a650; /* hijau seperti awal */
-    overflow: hidden;
-    height: 100%;
-  }
-  #unity-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-  }
-  #unity-canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-    background: transparent;
-  }
-  /* Fade effect */
-  .fade {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-  }
-  .fade.show {
-    opacity: 1;
-    pointer-events: all;
-  }
-  #loadingBar {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
-    height: 20px;
-    background: rgba(255,255,255,0.3);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  #progressBarFull {
-    width: 0%;
-    height: 100%;
-    background: #00ff99;
-    transition: width 0.2s;
-  }
-  #startARDiv {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.85);
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-  }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <title>AR PaylessXBINI</title>
+  <link rel="stylesheet" href="TemplateData/style.css" />
+  <link rel="stylesheet" href="TemplateData/CameraAssets/style-camera.css" />
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-D88WN5VBWM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag("js", new Date());
+    gtag("config", "G-D88WN5VBWM");
+    function TrackEventFromUnityWithParams(eventName, paramName, paramValue) {
+      const params = {};
+      params[paramName] = paramValue;
+      gtag("event", eventName, params);
+      console.log("Tracked event:", eventName, params);
+    }
+    function TrackEventFromUnitySimple(eventName) {
+      gtag("event", eventName);
+      console.log("Tracked simple event:", eventName);
+    }
+  </script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: black;
+    }
+    .ctaDiv {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background: #01ab01;
+      z-index: 99;
+    }
+    #unity-canvas,
+    #video-canvas,
+    #webcam-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+    #unity-canvas {
+      background-color: black;
+      z-index: 100;
+    }
+    #video-canvas { z-index: 1; }
+    #webcam-video {
+      z-index: 0;
+      object-fit: cover;
+    }
+  </style>
 </head>
 <body>
-<div id="unity-container">
-  <canvas id="unity-canvas"></canvas>
-  <!-- Loading Bar -->
-  <div id="loadingBar" class="fade">
-    <div id="progressBarFull"></div>
+  <!-- Video kamera di bawah Unity -->
+  <video id="webcam-video" muted autoplay playsinline></video>
+  <div id="unity-container" class="unity-mobile">
+    <canvas id="unity-canvas"></canvas>
+    <canvas id="video-canvas"></canvas>
+    <div id="unity-loading-bar">
+      <div id="unity-logo"></div>
+      <div id="unity-progress-bar-empty">
+        <div id="unity-progress-bar-full"></div>
+      </div>
+    </div>
   </div>
-  <!-- Start AR overlay -->
-  <div id="startARDiv" class="fade show" onclick="StartAR()">
-    <span>Start AR</span>
-  </div>
-</div>
-<script>
-  var canvas = document.querySelector("#unity-canvas");
-  var loadingBar = document.querySelector("#loadingBar");
-  var progressBarFull = document.querySelector("#progressBarFull");
-  function fadeIn(el) { el.classList.add("show"); }
-  function fadeOut(el) { el.classList.remove("show"); }
-  function StartAR() {
-    fadeOut(document.getElementById("startARDiv"));
-    fadeIn(loadingBar);
-    createUnityInstance(canvas, {
-      dataUrl: "Build/7883b95157ab90cb9ac41d15fb229039.data",
-      frameworkUrl: "Build/be4bf5028a38e037133b74d79d7b5558.framework.js",
-      codeUrl: "Build/426af1defc554b0f8e90e2242a4ba38f.wasm",
-      streamingAssetsUrl: "StreamingAssets",
-      companyName: "DefaultCompany",
-      productName: "AR PaylessXBINI",
-      productVersion: "1.0.19",
-      webglContextAttributes: {
-        alpha: true,
-        preserveDrawingBuffer: true
-      }
-    }, (progress) => {
-      progressBarFull.style.width = (100 * progress) + "%";
-    }).then((unityInstance) => {
-      window.unityInstance = unityInstance;
-      setTimeout(() => fadeOut(loadingBar), 300);
-    }).catch((message) => {
-      alert(message);
+  <!-- Firebase -->
+  <script src="./TemplateData/firebase-cdn/firebase-app-compat.js"></script>
+  <script src="./TemplateData/firebase-cdn/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseApp = firebase.initializeApp({
+      apiKey: "AIzaSyBvDcPxvJtBabZiXf4VjNeeE0DaAr_HKJM",
+      authDomain: "biniverse-f6e98.firebaseapp.com",
+      projectId: "biniverse-f6e98",
+      storageBucket: "biniverse-f6e98.firebasestorage.app",
+      messagingSenderId: "533927349797",
+      appId: "1:533927349797:web:94333dd2fd342e5ac339cc",
+      measurementId: "G-75JGD4FS6C",
     });
-  }
-</script>
+    const db = firebaseApp.firestore();
+  </script>
+  <!-- AR dan Unity -->
+  <script src="arcamera.js"></script>
+  <script src="itracker.js"></script>
+  <script src="Build/bb0d9ecdb05db3e84da20bd14a4f84dc.loader.js"></script>
+  <script>
+    let keyboardOpen = false;
+    window.addEventListener("focusin", () => { keyboardOpen = true; });
+    window.addEventListener("focusout", () => { keyboardOpen = false; });
+    window.addEventListener("resize", () => { if (keyboardOpen) return; });
+    var initialize = async () => {
+      var unityCanvas = document.querySelector("#unity-canvas");
+      var videoCanvas = document.querySelector("#video-canvas");
+      window.arCamera = new ARCamera(unityCanvas, videoCanvas);
+      window.iTracker = new ImageTracker(arCamera);
+      try {
+        await window.iTracker.initialize("./opencv.js");
+        console.log("ImageTracker initialized!");
+      } catch (error) {
+        console.error("Failed to initialize ImageTracker:", error);
+        ShowError("Failed to initialize the experience.");
+        return;
+      }
+      await LoadWebcams();
+      window.permissionsGranted = IsCameraPermissionGranted();
+    };
+    initialize();
+    function StartAR() {
+      document.getElementById("startARDiv")?.style.display = "none";
+      document.getElementById("startARButton")?.style.display = "none";
+      document.getElementById("chooseCamSel")?.style.display = "none";
+      createUnityInstance(document.querySelector("#unity-canvas"), {
+        dataUrl: "Build/7883b95157ab90cb9ac41d15fb229039.data",
+        frameworkUrl: "Build/be4bf5028a38e037133b74d79d7b5558.framework.js",
+        codeUrl: "Build/426af1defc554b0f8e90e2242a4ba38f.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "AR PaylessXBINI",
+        productVersion: "1.0.19",
+        webglContextAttributes: { alpha: true, preserveDrawingBuffer: true }
+      }, (progress) => {
+        document.getElementById("unity-progress-bar-full").style.width = (100 * progress) + "%";
+      }).then((unityInstance) => {
+        window.unityInstance = unityInstance;
+        if (window.permissionsGranted) RequestWebcam();
+        document.getElementById("unity-loading-bar").style.display = "none";
+      });
+      document.getElementById("unity-loading-bar").style.display = "block";
+    }
+  </script>
 </body>
 </html>
