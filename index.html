@@ -1,108 +1,283 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html>
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | AR PaylessXBINI</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
+    <meta charset="utf-8" />
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-D88WN5VBWM"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag("js", new Date());
+      gtag("config", "G-D88WN5VBWM");
+      function TrackEventFromUnityWithParams(eventName, paramName, paramValue) {
+        const params = {};
+        params[paramName] = paramValue;
+        gtag("event", eventName, params);
+        console.log("Tracked event:", eventName, params);
+      }
+      function TrackEventFromUnitySimple(eventName) {
+        gtag("event", eventName);
+        console.log("Tracked simple event:", eventName);
+      }
+    </script>
+    
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=yes"/>
+    <title>AR PaylessXBINI</title>
+    <link rel="stylesheet" href="TemplateData/style.css" />
+    <link rel="stylesheet" href="TemplateData/CameraAssets/style-camera.css" />
+    <style>
+      html { height: -webkit-fill-available; }
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        width: 100vw;
+        overflow: hidden;
+        background-color: #000; /* Hindari blink transparan */
+      }
+      .ctaDiv {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        left: 0; right: 0; top: 0; bottom: 0;
+        background: #01ab01;
+        z-index: 99;
+      }
+      /* Fade in/out smooth */
+      .fade {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+      .fade.show {
+        opacity: 1;
+        pointer-events: all;
+      }
+    </style>
   </head>
   <body>
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=720 height=1280 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
+    <!-- Camera video (hidden) -->
+    <video id="webcam-video" muted autoplay playsinline style="display:none;"></video>
+    <!-- Orientation notice -->
+    <div id="landscape-div" class="fade">
+      <img id="landscape-div-img" src="./TemplateData/CameraAssets/img_best_view.png"/>
+    </div>
+    <!-- Start AR -->
+    <div id="startARDiv" class="ctaDiv fade show">
+      <select id="chooseCamSel" style="display: none" onchange="SelectCam()"></select>
+      <img id="cameraLogoImageTop" src="TemplateData/CameraAssets/camera-logo-top.png" alt="" />
+      <img id="cameraTextImage" src="TemplateData/CameraAssets/camera-text.png" alt="" />
+      <button id="startARButton" onclick="StartAR()" style="display: none">
+        <img id="cameraButtonImage" src="TemplateData/CameraAssets/camera-button.png" alt="" />
+      </button>
+      <img id="cameraLogoImage" src="TemplateData/CameraAssets/camera-logo.png" alt="" />
+    </div>
+    <!-- Screenshot viewer -->
+    <div id="screenshotDiv" style="display: none" class="ctaDiv">
+      <div style="position: relative; background-color: #01ab01; padding: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.3), 0 6px 20px rgba(0,0,0,0.25);">
+        <img id="screenshotImg" src="" alt="screenshot" style="width: 80vw; height: 80vh"/>
+        <button onclick="document.getElementById('screenshotDiv').style.display = 'none';" style="position: absolute; transform: translateY(-100%); right: 0; top: 0;">Close</button>
+      </div>
+    </div>
+    <!-- Confirm URL -->
+    <div id="confirmUrlDiv" style="display: none" class="ctaDiv">
+      <div style="position: relative; background-color: #01ab01; padding: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.3), 0 6px 20px rgba(0,0,0,0.25); width: 80vw; display: flex; flex-direction: column; align-items: center;">
+        <p id="confirmUrlText" style="text-align: center; width: 80%; overflow: hidden; text-overflow: ellipsis;">Are you sure you want to visit url.com?</p>
+        <div>
+          <button onclick="window.open(newUrlString, '_blank').focus(); document.getElementById('confirmUrlDiv').style.display = 'none'">VISIT SITE</button>
+          <button onclick="document.getElementById('confirmUrlDiv').style.display = 'none'">GO BACK</button>
+        </div>
+      </div>
+    </div>
+    <!-- Error -->
+    <div id="errorDiv" class="ctaDiv fade" style="background: #aaa">
+      <p id="errorText" style="text-align: center; width: 60vw; color: white"></p>
+    </div>
+    <!-- Unity container -->
+    <div id="unity-container" class="unity-mobile fade">
+      <canvas id="unity-canvas" style="width: 100%; height: 100%; background: transparent; z-index: 100"></canvas>
+      <div id="unity-loading-bar" class="fade">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
           <div id="unity-progress-bar-full"></div>
         </div>
       </div>
-      <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-webgl-logo"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">AR PaylessXBINI</div>
-      </div>
+      <canvas id="video-canvas"></canvas>
     </div>
+    <!-- Scripts -->
+    <script src="arcamera.js"></script>
+    <script src="itracker.js"></script>
+    <script src="Build/bb0d9ecdb05db3e84da20bd14a4f84dc.loader.js"></script>
     <script>
+      /* Fade helpers */
+      function fadeIn(el) { el.classList.add("show"); }
+      function fadeOut(el) { el.classList.remove("show"); }
       var container = document.querySelector("#unity-container");
       var canvas = document.querySelector("#unity-canvas");
       var loadingBar = document.querySelector("#unity-loading-bar");
       var progressBarFull = document.querySelector("#unity-progress-bar-full");
-      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
-      var warningBanner = document.querySelector("#unity-warning");
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
-      function unityShowBanner(msg, type) {
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+      var initialize = async () => {
+        var unityCanvas = document.querySelector("#unity-canvas");
+        var videoCanvas = document.querySelector("#video-canvas");
+        window.arCamera = new ARCamera(unityCanvas, videoCanvas);
+        window.iTracker = new ImageTracker(arCamera);
+        try {
+          await window.iTracker.initialize("./opencv.js");
+          console.log("ImageTracker initialized!");
+        } catch (error) {
+          console.error("Failed to initialize ImageTracker. Missing opencv.js?", error);
+          ShowError("Failed to initialize the experience.");
+          return;
         }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
-      }
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/bb0d9ecdb05db3e84da20bd14a4f84dc.loader.js";
-      var config = {
-        dataUrl: buildUrl + "/5713f8ce308301bf212f296b9c6d0027.data",
-        frameworkUrl: buildUrl + "/c7ecdfa8f362ca28d8b942e3daba28f8.framework.js",
-        codeUrl: buildUrl + "/4ae09cd4b25c6654912af48ac4506de7.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "AR PaylessXBINI",
-        productVersion: "1.0.19",
-        showBanner: unityShowBanner,
+        await LoadWebcams();
+        document.getElementById("startARButton").style.display = "flex";
+        window.permissionsGranted = IsCameraPermissionGranted();
       };
-      // By default, Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        container.className = "unity-mobile";
-        canvas.className = "unity-mobile";
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
-      } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "720px";
-        canvas.style.height = "1280px";
-      }
-      loadingBar.style.display = "block";
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
+      initialize();
+      function StartAR() {
+        fadeOut(document.getElementById("startARDiv"));
+        createUnityInstance(canvas, {
+          dataUrl: "Build/117cf0195ac4a5521853699dc64bd0fb.data",
+          frameworkUrl: "Build/c7ecdfa8f362ca28d8b942e3daba28f8.framework.js",
+          codeUrl: "Build/4ae09cd4b25c6654912af48ac4506de7.wasm",
+          streamingAssetsUrl: "StreamingAssets",
+          companyName: "DefaultCompany",
+          productName: "AR PaylessXBINI",
+          productVersion: "1.0.19",
+          webglContextAttributes: { alpha: true, preserveDrawingBuffer: true }
+        }, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
-              }).then((unityInstance) => {
-                loadingBar.style.display = "none";
-                fullscreenButton.onclick = () => {
-                  document.makeFullscreen('unity-container');
-                };
-              }).catch((message) => {
-                alert(message);
-              });
-            };
-      document.body.appendChild(script);
+        }).then((unityInstance) => {
+          window.unityInstance = unityInstance;
+          if(window.permissionsGranted) RequestWebcam();
+          setTimeout(() => fadeOut(loadingBar), 300);
+        });
+        fadeIn(loadingBar);
+      }
+      (() => {
+        const land = document.getElementById("landscape-div");
+        const landImg = document.getElementById("landscape-div-img");
+        const mq = matchMedia("(orientation:portrait)");
+        const flip = () => {
+          const isPortrait = mq.matches;
+          landImg.style.opacity = isPortrait ? 0 : 1;
+          land.style.zIndex = isPortrait ? "" : 9999;
+        };
+        flip();
+        mq.addEventListener("change", flip);
+      })();
+		window.unityFacingMode = "environment"
+      window.WEBCAM_SETTINGS = { video: { facingMode: unityFacingMode }, audio: false };
+      window.requestingForPermissions = false;
+      async function RequestWebcam(){
+        window.requestingForPermissions = true;
+        try {
+          window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
+          console.log("Webcam access granted");
+          requestingForPermissions = false;
+          StopWebcam();
+        } catch (err) {
+          console.error("getUserMedia error - " , err);
+          ShowError("Failed to start the experience. Camera permission was denied");
+          window.requestingForPermissions = false;
+        }
+      }
+      function StopWebcam(){
+        console.log("stopping camera");
+        window.webcamStream.getTracks().forEach(track => track.stop());
+      }
+      async function StartWebcam(){
+        console.log("StartWebcam")
+        if (!window.webcamStream) {
+          window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
+        }
+        const video = document.querySelector("#webcam-video");
+        video.srcObject = webcamStream;
+        try {
+          await arCamera.startWebcam(video);
+          console.log("Webcam started successfully");
+          window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamSuccess');
+        } catch(err){
+          console.error("Webcam failed to start - ", err);
+          window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
+        }
+      }
+      async function LoadWebcams(){
+        let camDevices = [];
+        let devices = await navigator.mediaDevices.enumerateDevices();
+        devices.forEach(mediaDevice => {
+          if (mediaDevice.kind === 'videoinput') camDevices.push(mediaDevice);
+        });
+        var select = document.getElementById("chooseCamSel");
+        camDevices.reverse().forEach((mediaDevice, count) => {
+          const option = document.createElement('option');
+          option.value = mediaDevice.deviceId;
+          option.textContent = mediaDevice.label || `Camera ${count}`;
+          select.appendChild(option);
+        });
+      }
+      function SelectCam(){
+        var select = document.getElementById("chooseCamSel");
+        window.deviceId = select.value;
+        window.WEBCAM_SETTINGS.video['deviceId'] = deviceId;
+      }
+      async function FlipCam(){
+        fadeOut(container);
+        await new Promise(r => setTimeout(r, 200));
+        arCamera.stopWebcam();
+        window.WEBCAM_SETTINGS.video.deviceId = '';
+        if(window.WEBCAM_SETTINGS.video.facingMode == 'user'){
+          window.WEBCAM_SETTINGS.video.facingMode = 'environment';
+          arCamera.setFlipped(false);
+        } else {
+          window.WEBCAM_SETTINGS.video.facingMode = 'user';
+          arCamera.setFlipped(true);
+        }
+        window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
+        const video = document.querySelector("#webcam-video");
+        video.srcObject = webcamStream;
+        await arCamera.startWebcam(video);
+        fadeIn(container);
+      }
+      async function IsCameraPermissionGranted() {
+        if (!navigator.permissions || !navigator.mediaDevices) return false;
+        try {
+          const permissionStatus = await navigator.permissions.query({ name: "camera" });
+          return permissionStatus.state === "granted";
+        } catch { return false; }
+      }
+      function ShowError(error){
+        document.getElementById("errorText").innerHTML = error;
+        fadeIn(document.getElementById("errorDiv"));
+      }
+      function ShowScreenshot(dataUrl){
+        document.getElementById("screenshotDiv").style.display = "flex";
+        document.getElementById("screenshotImg").src = dataUrl;
+      }
+      function ShowConfirmUrl(url){
+        document.getElementById("confirmUrlDiv").style.display = "flex";
+        window.newUrlString = url;
+        document.getElementById("confirmUrlText").innerText = "Are you sure you want to visit " + url;
+      }
+      window.ITRACKER_GLOBALS = { INTERNAL_SMOOTHFACTOR_POS: .075 };
+    </script>
+    <!-- Firebase -->
+    <script src="./TemplateData/firebase-cdn/firebase-app-compat.js"></script>
+    <script src="./TemplateData/firebase-cdn/firebase-firestore-compat.js"></script>
+    <script>
+      const firebaseApp = firebase.initializeApp({
+        apiKey: "AIzaSyBvDcPxvJtBabZiXf4VjNeeE0DaAr_HKJM",
+        authDomain: "biniverse-f6e98.firebaseapp.com",
+        projectId: "biniverse-f6e98",
+        storageBucket: "biniverse-f6e98.firebasestorage.app",
+        messagingSenderId: "533927349797",
+        appId: "1:533927349797:web:94333dd2fd342e5ac339cc",
+        measurementId: "G-75JGD4FS6C",
+      });
+      const db = firebaseApp.firestore();
     </script>
   </body>
 </html>
