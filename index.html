@@ -43,7 +43,7 @@
         width: 100vw;
         height: 100vh;
         background: transparent;
-        position: fixed; /* FIX: lock position */
+        position: fixed;
         top: 0;
         left: 0;
         z-index: 100;
@@ -51,7 +51,7 @@
       #video-canvas {
         width: 100vw;
         height: 100vh;
-        position: fixed; /* FIX: lock position */
+        position: fixed;
         top: 0;
         left: 0;
         object-fit: cover;
@@ -63,7 +63,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        position: fixed; /* FIX: lock position */
+        position: fixed;
         left: 0;
         right: 0;
         top: 0;
@@ -96,7 +96,7 @@
     <div id="screenshotDiv" class="ctaDiv hidden">
       <div style="position: relative; background-color: #01ab01; padding: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);">
         <img id="screenshotImg" src="" alt="screenshot" style="width: 80vw; height: 80vh" />
-        <button onclick="document.getElementById('screenshotDiv').classList.add('hidden')" style="position: fixed; /* FIX: lock position */ transform: translateY(-100%); right: 0; top: 0;">Close</button>
+        <button onclick="document.getElementById('screenshotDiv').classList.add('hidden')" style="position: fixed; transform: translateY(-100%); right: 0; top: 0;">Close</button>
       </div>
     </div>
     <div id="confirmUrlDiv" class="ctaDiv hidden">
@@ -143,26 +143,6 @@
         window.permissionsGranted = IsCameraPermissionGranted();
       };
       initialize();
-      
-  // FIX: Lock canvas size so it doesn't resize on keyboard show/hide
-  
-  
-  
-  // Automatically sync video canvas size with Unity canvas
-  const unityCanvasEl = document.getElementById("unity-canvas");
-  const videoCanvasEl = document.getElementById("video-canvas");
-  function syncVideoSize() {
-    const rect = unityCanvasEl.getBoundingClientRect();
-    videoCanvasEl.style.width = rect.width + "px";
-    videoCanvasEl.style.height = rect.height + "px";
-    videoCanvasEl.style.left = rect.left + "px";
-    videoCanvasEl.style.top = rect.top + "px";
-  }
-  // Initial sync
-  syncVideoSize();
-  // Sync on resize and orientation change
-  window.addEventListener("resize", syncVideoSize);
-  window.addEventListener("orientationchange", syncVideoSize);
       var canvas = document.querySelector("#unity-canvas");
       var loadingBar = document.querySelector("#unity-loading-bar");
       var progressBarFull = document.querySelector("#unity-progress-bar-full");
@@ -177,7 +157,7 @@
             companyName: "DefaultCompany",
             productName: "AR PaylessXBINI",
             productVersion: "1.0.19",
-            matchWebGLToCanvasSize: true, /* FIX: prevent Unity auto-resize */
+            matchWebGLToCanvasSize: true,
             webglContextAttributes: { alpha: true, preserveDrawingBuffer: true }
           },
           (progress) => { progressBarFull.style.width = 100 * progress + "%"; }
@@ -185,6 +165,18 @@
           window.unityInstance = unityInstance;
           if (window.permissionsGranted) RequestWebcam();
           loadingBar.style.display = "none";
+          // Sync video size only after Unity is ready
+          function syncVideoSize() {
+            const rect = canvas.getBoundingClientRect();
+            const videoCanvas = document.getElementById("video-canvas");
+            videoCanvas.style.width = rect.width + "px";
+            videoCanvas.style.height = rect.height + "px";
+            videoCanvas.style.left = rect.left + "px";
+            videoCanvas.style.top = rect.top + "px";
+          }
+          syncVideoSize();
+          window.addEventListener("resize", syncVideoSize);
+          window.addEventListener("orientationchange", syncVideoSize);
         });
         loadingBar.style.display = "block";
       }
