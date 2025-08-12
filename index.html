@@ -44,6 +44,7 @@
         min-height: -webkit-fill-available;
         width: 100vw;
         overflow: hidden;
+        background: #000;
       }
       .ctaDiv {
         display: flex;
@@ -241,6 +242,7 @@
       function StartAR() {
           canvas.style.width = window.innerWidth + "px";
           canvas.style.height = window.innerHeight + "px";
+          document.getElementById("startARDiv").style.background = "none";
           document.getElementById("startARDiv").style.display = "none";
           document.getElementById("startARButton").style.display = "none";
           document.getElementById("chooseCamSel").style.display = "none";
