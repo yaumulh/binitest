@@ -140,12 +140,13 @@
         }
         await LoadWebcams();
         document.getElementById("startARButton").style.display = "flex";
-        window.permissionsGranted = IsCameraPermissionGranted();
+        window.permissionsGranted = await IsCameraPermissionGranted(); // ✅ pakai await
       };
       initialize();
       var canvas = document.querySelector("#unity-canvas");
       var loadingBar = document.querySelector("#unity-loading-bar");
       var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var videoCanvas = document.querySelector("#video-canvas");
       function StartAR() {
         document.getElementById("startARDiv").classList.add("hidden");
         document.getElementById("chooseCamSel").style.display = "none";
@@ -160,15 +161,16 @@
             matchWebGLToCanvasSize: true,
             webglContextAttributes: { alpha: true, preserveDrawingBuffer: true }
           },
-          (progress) => { progressBarFull.style.width = 100 * progress + "%"; }
+          (progress) => { progressBarFull.style.width = (100 * progress) + "%"; }
         ).then((unityInstance) => {
           window.unityInstance = unityInstance;
-          if (window.permissionsGranted) RequestWebcam();
+          if (window.permissionsGranted === true) {
+            RequestWebcam();
+          }
           loadingBar.style.display = "none";
-          // Sync video size only after Unity is ready
+          // ✅ sync video setelah Unity siap
           function syncVideoSize() {
             const rect = canvas.getBoundingClientRect();
-            const videoCanvas = document.getElementById("video-canvas");
             videoCanvas.style.width = rect.width + "px";
             videoCanvas.style.height = rect.height + "px";
             videoCanvas.style.left = rect.left + "px";
