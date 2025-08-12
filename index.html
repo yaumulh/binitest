@@ -146,10 +146,12 @@
       
   // FIX: Lock canvas size so it doesn't resize on keyboard show/hide
   
+  
   const unityCanvasEl = document.getElementById("unity-canvas");
   const videoCanvasEl = document.getElementById("video-canvas");
   const gameAspect = 9 / 16; // fixed portrait ratio
   function lockCanvasSize() {
+    let devicePixelRatio = window.devicePixelRatio || 1;
     let width = window.innerWidth;
     let height = window.innerHeight;
     let currentAspect = width / height;
@@ -164,15 +166,19 @@
     unityCanvasEl.style.height = height + "px";
     videoCanvasEl.style.width = width + "px";
     videoCanvasEl.style.height = height + "px";
-    unityCanvasEl.width = width;
-    unityCanvasEl.height = height;
-    videoCanvasEl.width = width;
-    videoCanvasEl.height = height;
+    // Set internal resolution for crisp rendering
+    unityCanvasEl.width = Math.floor(width * devicePixelRatio);
+    unityCanvasEl.height = Math.floor(height * devicePixelRatio);
+    videoCanvasEl.width = Math.floor(width * devicePixelRatio);
+    videoCanvasEl.height = Math.floor(height * devicePixelRatio);
   }
   lockCanvasSize();
+  // Only resize if not caused by keyboard open/close
+  let lastHeight = window.innerHeight;
   window.addEventListener("resize", () => {
-    const activeTag = document.activeElement.tagName;
-    if (activeTag !== "INPUT" && activeTag !== "TEXTAREA") {
+    const heightDiff = Math.abs(window.innerHeight - lastHeight);
+    lastHeight = window.innerHeight;
+    if (heightDiff > 150) {
       lockCanvasSize();
     }
   });
