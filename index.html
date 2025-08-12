@@ -145,13 +145,29 @@
       initialize();
       
   // FIX: Lock canvas size so it doesn't resize on keyboard show/hide
+  
   const unityCanvasEl = document.getElementById("unity-canvas");
   const videoCanvasEl = document.getElementById("video-canvas");
+  const gameAspect = 9 / 16; // fixed portrait ratio
   function lockCanvasSize() {
-    unityCanvasEl.style.width = window.innerWidth + "px";
-    unityCanvasEl.style.height = window.innerHeight + "px";
-    videoCanvasEl.style.width = window.innerWidth + "px";
-    videoCanvasEl.style.height = window.innerHeight + "px";
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    let currentAspect = width / height;
+    if (currentAspect > gameAspect) {
+      // screen too wide -> adjust width
+      width = height * gameAspect;
+    } else {
+      // screen too tall -> adjust height
+      height = width / gameAspect;
+    }
+    unityCanvasEl.style.width = width + "px";
+    unityCanvasEl.style.height = height + "px";
+    videoCanvasEl.style.width = width + "px";
+    videoCanvasEl.style.height = height + "px";
+    unityCanvasEl.width = width;
+    unityCanvasEl.height = height;
+    videoCanvasEl.width = width;
+    videoCanvasEl.height = height;
   }
   lockCanvasSize();
   window.addEventListener("resize", () => {
