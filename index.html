@@ -27,6 +27,7 @@
     <style>
       html, body {
         margin: 0;
+        background: black; /* prevent white flicker */
         padding: 0;
         height: 100%;
         width: 100%;
@@ -42,7 +43,7 @@
         width: 100vw;
         height: 100vh;
         background: transparent;
-        position: absolute;
+        position: fixed; /* FIX: lock position */
         top: 0;
         left: 0;
         z-index: 100;
@@ -50,7 +51,7 @@
       #video-canvas {
         width: 100vw;
         height: 100vh;
-        position: absolute;
+        position: fixed; /* FIX: lock position */
         top: 0;
         left: 0;
         object-fit: cover;
@@ -62,7 +63,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        position: absolute;
+        position: fixed; /* FIX: lock position */
         left: 0;
         right: 0;
         top: 0;
@@ -95,7 +96,7 @@
     <div id="screenshotDiv" class="ctaDiv hidden">
       <div style="position: relative; background-color: #01ab01; padding: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);">
         <img id="screenshotImg" src="" alt="screenshot" style="width: 80vw; height: 80vh" />
-        <button onclick="document.getElementById('screenshotDiv').classList.add('hidden')" style="position: absolute; transform: translateY(-100%); right: 0; top: 0;">Close</button>
+        <button onclick="document.getElementById('screenshotDiv').classList.add('hidden')" style="position: fixed; /* FIX: lock position */ transform: translateY(-100%); right: 0; top: 0;">Close</button>
       </div>
     </div>
     <div id="confirmUrlDiv" class="ctaDiv hidden">
@@ -142,6 +143,23 @@
         window.permissionsGranted = IsCameraPermissionGranted();
       };
       initialize();
+      
+  // FIX: Lock canvas size so it doesn't resize on keyboard show/hide
+  const unityCanvasEl = document.getElementById("unity-canvas");
+  const videoCanvasEl = document.getElementById("video-canvas");
+  function lockCanvasSize() {
+    unityCanvasEl.style.width = window.innerWidth + "px";
+    unityCanvasEl.style.height = window.innerHeight + "px";
+    videoCanvasEl.style.width = window.innerWidth + "px";
+    videoCanvasEl.style.height = window.innerHeight + "px";
+  }
+  lockCanvasSize();
+  window.addEventListener("resize", () => {
+    const activeTag = document.activeElement.tagName;
+    if (activeTag !== "INPUT" && activeTag !== "TEXTAREA") {
+      lockCanvasSize();
+    }
+  });
       var canvas = document.querySelector("#unity-canvas");
       var loadingBar = document.querySelector("#unity-loading-bar");
       var progressBarFull = document.querySelector("#unity-progress-bar-full");
@@ -156,6 +174,7 @@
             companyName: "DefaultCompany",
             productName: "AR PaylessXBINI",
             productVersion: "1.0.19",
+            matchWebGLToCanvasSize: false, /* FIX: prevent Unity auto-resize */
             webglContextAttributes: { alpha: true, preserveDrawingBuffer: true }
           },
           (progress) => { progressBarFull.style.width = 100 * progress + "%"; }
